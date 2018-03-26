@@ -3,11 +3,6 @@ var socket = io();
 //Not using ES6 sintax to be compatible with other beowsers and mobiles
 socket.on('connect', function() {
   console.log('Connected to server');
-
-  socket.emit('createMessage', {
-    from: 'Mary',
-    text: 'Marys message'
-  });
 });
 socket.on('disconnect', function () {
   console.log('Disconnected from server');
