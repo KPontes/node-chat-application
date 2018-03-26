@@ -3,6 +3,8 @@ const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 
+const {generateMessage} = require('./utils/message');
+
 //just to facilitate project path structure to express
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
@@ -18,30 +20,20 @@ io.on('connection', (socket) => {
   console.log('New user connected');
   //socket.emit('newMessage', {text: 'this is a message'});
   //sends message only to my connection
-  socket.emit('newMessage', {
-    from: 'Admin',
-    text: 'Welcome to the chat app',
-    createdAt: new Date().getTime()
-  });
+  socket.emit('newMessage', generateMessage('Admin', 'Welcome to the chat app'));
   //sends message to everyone but my connection
-  socket.broadcast.emit('newMessage', {
-    from: 'Admin',
-    text: 'New user joined',
-    createdAt: new Date().getTime()
-  });
-  
+  socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
+
   //Listen for our specific event createMessage emited in the client
-  socket.on('createMessage', (message) => {
+  socket.on('createMessage', (message, callback) => {
     console.log('Received createMessage from the client', message);
 
     //socket.emit emits an event to a single connection,
     //as io.emit broadcasts to all socket connections
-    io.emit('newMessage', {
-      from: message.from,
-      text: message.text,
-      createdAt: new Date().getTime()
-    });
-    //sends to everyone excepts for my own connection
+    io.emit('newMessage', generateMessage(message.from, message.text));
+    callback('Server says received OK');
+
+    //socket.broadcast.emit sends to everyone excepts for my own connection
     // socket.broadcast.emit('newMessage', {
     //   from: message.from,
     //   text: message.text,

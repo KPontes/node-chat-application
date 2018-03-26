@@ -12,3 +12,10 @@ socket.on('disconnect', function () {
 socket.on('newMessage', function (message) {
   console.log('Received message from the server', message);
 });
+//the third argument is a callback function to get back the acknowledgement
+socket.emit('createMessage', {
+  from: 'Client',
+  text: 'client message'
+}, function (data) {
+  console.log('Got it', data);
+});
