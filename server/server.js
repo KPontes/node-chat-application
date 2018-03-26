@@ -17,7 +17,19 @@ app.use(express.static(publicPath));
 io.on('connection', (socket) => {
   console.log('New user connected');
   //socket.emit('newMessage', {text: 'this is a message'});
-
+  //sends message only to my connection
+  socket.emit('newMessage', {
+    from: 'Admin',
+    text: 'Welcome to the chat app',
+    createdAt: new Date().getTime()
+  });
+  //sends message to everyone but my connection
+  socket.broadcast.emit('newMessage', {
+    from: 'Admin',
+    text: 'New user joined',
+    createdAt: new Date().getTime()
+  });
+  
   //Listen for our specific event createMessage emited in the client
   socket.on('createMessage', (message) => {
     console.log('Received createMessage from the client', message);
@@ -29,6 +41,12 @@ io.on('connection', (socket) => {
       text: message.text,
       createdAt: new Date().getTime()
     });
+    //sends to everyone excepts for my own connection
+    // socket.broadcast.emit('newMessage', {
+    //   from: message.from,
+    //   text: message.text,
+    //   createdAt: new Date().getTime()
+    // });
   })
 
   socket.on('disconnect', () => {
