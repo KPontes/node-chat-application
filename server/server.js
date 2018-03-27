@@ -3,7 +3,7 @@ const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 
-const {generateMessage} = require('./utils/message');
+const {generateMessage, generateLocationMessage} = require('./utils/message');
 
 //just to facilitate project path structure to express
 const publicPath = path.join(__dirname, '../public');
@@ -25,20 +25,17 @@ io.on('connection', (socket) => {
   socket.broadcast.emit('newMessage', generateMessage('Admin', 'New user joined'));
 
   //Listen for our specific event createMessage emited in the client
+  //socket.emit emits an event to a single connection,
+  //as io.emit broadcasts to all socket connections
+  //and socket.broadcast.emit sends to everyone excepts for my own connection
   socket.on('createMessage', (message, callback) => {
     console.log('Received createMessage from the client', message);
-
-    //socket.emit emits an event to a single connection,
-    //as io.emit broadcasts to all socket connections
     io.emit('newMessage', generateMessage(message.from, message.text));
     callback('Server says received OK');
+  });
 
-    //socket.broadcast.emit sends to everyone excepts for my own connection
-    // socket.broadcast.emit('newMessage', {
-    //   from: message.from,
-    //   text: message.text,
-    //   createdAt: new Date().getTime()
-    // });
+  socket.on('createLocationMessage', (coords) => {
+    io.emit('newLocationMessage', generateLocationMessage('Admin', coords.latitude, coords.longitude));
   })
 
   socket.on('disconnect', () => {
