@@ -21,9 +21,30 @@ function scrollToBottom () {
 //Not using ES6 sintax to be compatible with other beowsers and mobiles
 socket.on('connect', function() {
   console.log('Connected to server');
+  //window.location.search brings the query string
+  //to be decomposed into an object by our custom deparam lib
+  var params = jQuery.deparam(window.location.search);
+  socket.emit('join', params, function (err) {
+    if (err) {
+      alert(err);
+      window.location.href = '/'; //send back to login page
+    } else {
+      console.log('No error');
+    };
+  });
+
 });
+
 socket.on('disconnect', function () {
   console.log('Disconnected from server');
+});
+
+socket.on('updateUserList', function (users) {
+  var ol = jQuery('<ol></ol>');
+  users.forEach(function (user) {
+    ol.append(jQuery('<li></li>').text(user));
+  });
+  jQuery('#users').html(ol);
 });
 
 //Listen specific newMessage client event, that was emited by the server
